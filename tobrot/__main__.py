@@ -31,7 +31,9 @@ from tobrot import (
     GET_SIZE_G,
     STATUS_COMMAND,
     SAVE_THUMBNAIL,
-    CLEAR_THUMBNAIL
+    CLEAR_THUMBNAIL,
+    PYTDL_COMMAND_G,
+    LOG_COMMAND
 )
 
 from pyrogram import Client, Filters, MessageHandler, CallbackQueryHandler
@@ -43,8 +45,8 @@ from tobrot.plugins.status_message_fn import (
     status_message_f,
     cancel_message_f,
     exec_message_f,
-    upload_document_f
-    #eval_message_f
+    upload_document_f,
+    upload_log_file
 )
 from tobrot.plugins.call_back_button_handler import button
 from tobrot.plugins.custom_thumbnail import (
@@ -111,7 +113,7 @@ if __name__ == "__main__" :
     #
     incoming_youtube_playlist_dl_handler = MessageHandler(
         g_yt_playlist,
-        filters=Filters.command(["pytdl"]) & Filters.chat(chats=AUTH_CHANNEL)
+        filters=Filters.command([f"{PYTDL_COMMAND_G}"]) & Filters.chat(chats=AUTH_CHANNEL)
     )
     app.add_handler(incoming_youtube_playlist_dl_handler)
     #
@@ -152,7 +154,13 @@ if __name__ == "__main__" :
         filters=Filters.command(["upload"]) & Filters.chat(chats=AUTH_CHANNEL)
     )
     app.add_handler(upload_document_handler)
-
+    #
+    upload_log_handler = MessageHandler(
+        upload_log_file,
+        filters=Filters.command([f"{LOG_COMMAND}"]) & Filters.chat(chats=AUTH_CHANNEL)
+    )
+    app.add_handler(upload_log_handler)
+    #
     help_text_handler = MessageHandler(
         help_message_f,
         filters=Filters.command(["help"]) & Filters.chat(chats=AUTH_CHANNEL)
@@ -187,5 +195,6 @@ if __name__ == "__main__" :
         filters=Filters.command([f"{CLEAR_THUMBNAIL}"]) & Filters.chat(chats=AUTH_CHANNEL)
     )
     app.add_handler(clear_thumb_nail_handler)
+    app.DOWNLOAD_WORKERS = 20
     #
     app.run()
